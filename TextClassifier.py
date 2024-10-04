@@ -6,7 +6,7 @@ import tensorflow as tf
 import tensorflow_hub as hub
 
 # Title for the Streamlit App
-st.title("Wine Reviews Classification")
+st.title("Wine Review Quality Classifier")
 
 # Load the dataset
 @st.cache_data
