@@ -40,7 +40,7 @@ if st.button('Predict'):
         st.error('Please enter a wine review.')
     else:
         # Prediction
-        pred_prob = model.predict([review_input])[0][0]
+        pred_prob = model.predict(tf.convert_to_tensor([review_input]))[0][0]
         label = 'High Quality' if pred_prob >= 0.5 else 'Low Quality'
         
         # Show result
