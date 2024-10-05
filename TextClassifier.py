@@ -11,7 +11,7 @@ def load_model():
     hub_layer = hub.KerasLayer(embedding, dtype=tf.string, trainable=True)
 
     model = tf.keras.Sequential()
-    model.add(tf.keras.layers.Lambda(lambda text: hub_layer(text), input_shape=[], dtype=tf.string))
+    model.add(hub_layer)  # Directly add the hub layer
     model.add(tf.keras.layers.Dense(16, activation='relu'))
     model.add(tf.keras.layers.Dropout(0.4))
     model.add(tf.keras.layers.Dense(16, activation='relu'))
@@ -29,17 +29,13 @@ model = load_model()
 # Load and preprocess your dataset
 train_data = pd.read_csv('https://raw.githubusercontent.com/Furqan-Qureshi786/TextClassifier/main/wine-reviews.csv')
 
-# Convert specific columns to numeric, handling errors by coercing to NaN
-columns_to_convert = ['points', 'price']
-for column in columns_to_convert:
-    train_data[column] = pd.to_numeric(train_data[column], errors='coerce')
-
-# Fill NaN values after conversion
-train_data.fillna(0, inplace=True)
+# Check if 'quality' is a binary column; for example, you may want to create it based on 'points'
+# This step assumes quality is defined based on points, e.g., >= 85 is high quality
+train_data['quality'] = np.where(train_data['points'] >= 85, 1, 0)  # Adjust this threshold as needed
 
 # Prepare the data for training (split features and labels)
-X = train_data['description']  # Feature column
-y = train_data['points']  # Ensure this is a binary column; adjust if necessary
+X = train_data['description']  # Feature column (text input)
+y = train_data['quality']       # Target variable (binary)
 
 # Streamlit app interface
 st.title('Wine Review Quality Classifier')
@@ -52,16 +48,12 @@ if st.button('Predict'):
     if review_input.strip() == '':
         st.error('Please enter a wine review.')
     else:
-        # Preprocess the input (wrap the input string in a list and ensure it's of type string)
-        review_input_array = tf.convert_to_tensor([review_input], dtype=tf.string)
-
-        # Debugging: Check the input shape and type
-        st.write(f'Input shape: {review_input_array.shape}')
-        st.write(f'Input type: {type(review_input_array)}')
+        # Preprocess the input (keep it as a string)
+        review_input_array = np.array([review_input])
 
         # Prediction
         try:
-            pred_prob = model.predict(review_input_array)
+            pred_prob = model.predict(review_input_array)  # Model expects numpy array
             pred_prob_value = pred_prob[0][0]  # Get the probability
 
             label = 'High Quality' if pred_prob_value >= 0.5 else 'Low Quality'
@@ -71,3 +63,4 @@ if st.button('Predict'):
             st.text(f'Probability of being High Quality: {pred_prob_value:.2f}')
         except Exception as e:
             st.error(f'Error during prediction: {e}')
+
