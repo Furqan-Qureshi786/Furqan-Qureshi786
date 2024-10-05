@@ -56,8 +56,27 @@ else:
             st.error('Please enter a wine review.')
         else:
             try:
-                # Ensure the input is in the correct format (a list of strings)
-                review_array = tf.convert_to_tensor([review_input], dtype=tf.string)  # Convert directly to tensor
+                # Preprocess the review (e.g., tokenization and embedding)
+                def preprocess_review(text):
+                    # Tokenize the text
+                    tokens = tf.keras.preprocessing.text.text_to_word_sequence(text)
+
+                    # Create a vocabulary and convert tokens to indices
+                    vocab = set(tokens)
+                    word_index = {word: i for i, word in enumerate(vocab)}
+                    encoded_review = [word_index.get(word, 0) for word in tokens]
+
+                    # Pad the sequence to a fixed length (adjust as needed)
+                    max_length = 100
+                    padded_review = tf.keras.preprocessing.sequence.pad_sequences([encoded_review], maxlen=max_length, padding='post')
+
+                    return padded_review
+
+                processed_review = preprocess_review(review_input)
+
+                # Convert the processed review to a single-element tensor
+                review_array = tf.convert_to_tensor([processed_review], dtype=tf.float32)
+
                 pred_prob = model.predict(review_array)[0][0]
 
                 # Determine label based on the predicted probability
