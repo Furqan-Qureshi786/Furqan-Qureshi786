@@ -52,8 +52,8 @@ if st.button('Predict'):
     if review_input.strip() == '':
         st.error('Please enter a wine review.')
     else:
-        # Preprocess the input (wrap the input string in a list)
-        review_input_array = np.array([review_input])
+        # Preprocess the input (wrap the input string in a list and ensure it's of type string)
+        review_input_array = tf.convert_to_tensor([review_input], dtype=tf.string)
 
         # Debugging: Check the input shape and type
         st.write(f'Input shape: {review_input_array.shape}')
