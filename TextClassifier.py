@@ -57,7 +57,7 @@ else:
         else:
             try:
                 # Ensure the input is in the correct format (a list of strings)
-                review_array = np.array([review_input], dtype=object)  # Set dtype to object for string handling
+                review_array = tf.convert_to_tensor([review_input], dtype=tf.string)  # Convert directly to tensor
                 pred_prob = model.predict(review_array)[0][0]
 
                 # Determine label based on the predicted probability
