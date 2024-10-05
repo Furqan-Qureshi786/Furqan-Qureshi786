@@ -5,61 +5,57 @@ import numpy as np
 import pandas as pd
 
 # Load the model
+@st.cache_resource
 def load_model():
     embedding = "https://tfhub.dev/google/nnlm-en-dim50/2"
-    hub_layer = hub.KerasLayer(embedding, input_shape=[], dtype=tf.string, trainable=True)
+    hub_layer = hub.KerasLayer(embedding, dtype=tf.string, trainable=True)
 
-    model = tf.keras.Sequential([
-        hub_layer,  # Add hub layer directly
-        tf.keras.layers.Dense(16, activation='relu'),
-        tf.keras.layers.Dropout(0.4),
-        tf.keras.layers.Dense(16, activation='relu'),
-        tf.keras.layers.Dropout(0.4),
-        tf.keras.layers.Dense(1, activation='sigmoid')
-    ])
+    model = tf.keras.Sequential()
+    model.add(tf.keras.layers.Lambda(lambda text: hub_layer(text), input_shape=[], dtype=tf.string))
+    model.add(tf.keras.layers.Dense(16, activation='relu'))
+    model.add(tf.keras.layers.Dropout(0.4))
+    model.add(tf.keras.layers.Dense(16, activation='relu'))
+    model.add(tf.keras.layers.Dropout(0.4))
+    model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
     
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
-                  loss=tf.keras.losses.BinaryCrossentropy(),
-                  metrics=['accuracy'])
-    
+    # Load trained weights (if you have any)
+    # Example: model.load_weights('path_to_saved_model_weights')
     return model
 
-model = load_model()  # Load the model without caching
+model = load_model()
 
 # Load and preprocess your dataset
-train_data = pd.read_csv('https://raw.githubusercontent.com/Furqan-Qureshi786/TextClassifier/main/wine-reviews.csv')
+train_data = pd.read_csv('https://raw.githubusercontent.com/Furqan-Qureshi786/TextClassifier/refs/heads/main/wine-reviews.csv')
 
-# Check if 'quality' is a binary column; for example, you may want to create it based on 'points'
-# This step assumes quality is defined based on points, e.g., >= 85 is high quality
-train_data['quality'] = np.where(train_data['points'] >= 85, 1, 0)  # Adjust this threshold as needed
+# Check if the necessary columns exist
+if 'description' not in train_data.columns or 'points' not in train_data.columns:
+    st.error("The required columns 'description' or 'points' are not present in the dataset.")
+else:
+    # Convert specific columns to numeric, handling errors by coercing to NaN
+    train_data['points'] = pd.to_numeric(train_data['points'], errors='coerce')
+    train_data.fillna({'points': 0}, inplace=True)  # Fill NaN values for points column
 
-# Prepare the data for training (split features and labels)
-X = train_data['description']  # Feature column (text input)
-y = train_data['quality']       # Target variable (binary)
+    # Prepare the data for training (features and labels)
+    X = train_data['description']  # Feature column
+    y = train_data['points']  # Target variable; ensure this is numeric
 
-# Streamlit app interface
-st.title('Wine Review Quality Classifier')
+    # Streamlit app interface
+    st.title('Wine Review Quality Classifier')
 
-# Text input for wine review
-review_input = st.text_area('Enter your wine review:', '')
+    # Text input for wine review
+    review_input = st.text_area('Enter your wine review:', '')
 
-# Predict button
-if st.button('Predict'):
-    if review_input.strip() == '':
-        st.error('Please enter a wine review.')
-    else:
-        # Preprocess the input (keep it as a string)
-        review_input_array = np.array([review_input])
+    # Predict button
+    if st.button('Predict'):
+        if review_input.strip() == '':
+            st.error('Please enter a wine review.')
+        else:
+            # Make the prediction
+            pred_prob = model.predict(np.array([review_input]))[0][0]
 
-        # Prediction
-        try:
-            pred_prob = model.predict(review_input_array)  # Model expects numpy array
-            pred_prob_value = pred_prob[0][0]  # Get the probability
-
-            label = 'High Quality' if pred_prob_value >= 0.5 else 'Low Quality'
+            # Determine label based on the predicted probability
+            label = 'High Quality' if pred_prob >= 0.5 else 'Low Quality'
             
             # Show result
             st.subheader(f'Prediction: {label}')
-            st.text(f'Probability of being High Quality: {pred_prob_value:.2f}')
-        except Exception as e:
-            st.error(f'Error during prediction: {e}')
+            st.text(f'Probability of being High Quality: {pred_prob:.2f}')
