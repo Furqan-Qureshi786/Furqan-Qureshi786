@@ -17,10 +17,10 @@ def load_model():
     model.add(tf.keras.layers.Dense(16, activation='relu'))
     model.add(tf.keras.layers.Dropout(0.4))
     model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
-    
+
     # Uncomment if you have a pre-trained model
     # model.load_weights('path_to_saved_model_weights')
-    
+
     return model
 
 model = load_model()
@@ -56,13 +56,13 @@ else:
             st.error('Please enter a wine review.')
         else:
             try:
-                # Make the prediction
-                review_array = np.array([review_input])  # Ensure the input is in the correct shape
+                # Ensure the input is in the correct format (a list of strings)
+                review_array = np.array([review_input], dtype=object)  # Set dtype to object for string handling
                 pred_prob = model.predict(review_array)[0][0]
 
                 # Determine label based on the predicted probability
                 label = 'High Quality' if pred_prob >= 0.5 else 'Low Quality'
-                
+
                 # Show result
                 st.subheader(f'Prediction: {label}')
                 st.text(f'Probability of being High Quality: {pred_prob:.2f}')
