@@ -29,7 +29,7 @@ def load_model():
 model = load_model()
 
 # Load and preprocess your dataset
-train_data = pd.read_csv('wine-reviews.csv')
+train_data = pd.read_csv('https://raw.githubusercontent.com/Furqan-Qureshi786/TextClassifier/refs/heads/main/wine-reviews.csv')
 
 # Convert specific columns to numeric, handling errors by coercing to NaN
 columns_to_convert = ['points', 'price']  # Only numeric columns
@@ -42,7 +42,7 @@ train_data.fillna(0, inplace=True)  # You can also use train_data.dropna(inplace
 # Prepare the data for training (split features and labels)
 # Assuming 'quality' is your target variable; adjust as needed
 X = train_data['description']  # Feature column
-y = train_data['quality']  # Target variable
+y = train_data['points']  # Target variable; change 'quality' to 'points' based on your dataset
 
 # Optionally: Split your data into training and validation sets here
 
