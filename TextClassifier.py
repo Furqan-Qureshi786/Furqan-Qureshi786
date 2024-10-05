@@ -77,6 +77,9 @@ else:
                 # Convert the processed review to a single-element tensor
                 review_array = tf.convert_to_tensor([processed_review], dtype=tf.float32)
 
+                # Reshape the review array to (1, length_of_sequence)
+                review_array = review_array.reshape(1, -1)
+
                 pred_prob = model.predict(review_array)[0][0]
 
                 # Determine label based on the predicted probability
