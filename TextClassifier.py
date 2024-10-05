@@ -11,7 +11,8 @@ def load_model():
     hub_layer = hub.KerasLayer(embedding, dtype=tf.string, trainable=True)
 
     model = tf.keras.Sequential()
-    model.add(tf.keras.layers.Lambda(lambda text: hub_layer(text), input_shape=[], dtype=tf.string))
+    model.add(tf.keras.layers.Lambda(lambda text: hub_layer(text), input_shape=(None,), dtype=tf.string))
+# ... (rest of your model layers)
     model.add(tf.keras.layers.Dense(16, activation='relu'))
     model.add(tf.keras.layers.Dropout(0.4))
     model.add(tf.keras.layers.Dense(16, activation='relu'))
