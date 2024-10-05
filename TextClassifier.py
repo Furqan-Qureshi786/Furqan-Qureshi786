@@ -39,7 +39,7 @@ train_data.fillna(0, inplace=True)
 
 # Prepare the data for training (split features and labels)
 X = train_data['description']  # Feature column
-y = train_data['points']  # Target variable
+y = train_data['points']  # Ensure this is a binary column; adjust if necessary
 
 # Streamlit app interface
 st.title('Wine Review Quality Classifier')
@@ -55,11 +55,19 @@ if st.button('Predict'):
         # Preprocess the input (wrap the input string in a list)
         review_input_array = np.array([review_input])
 
-        # Prediction
-        pred_prob = model.predict(review_input_array)[0][0]
+        # Debugging: Check the input shape and type
+        st.write(f'Input shape: {review_input_array.shape}')
+        st.write(f'Input type: {type(review_input_array)}')
 
-        label = 'High Quality' if pred_prob >= 0.5 else 'Low Quality'
-        
-        # Show result
-        st.subheader(f'Prediction: {label}')
-        st.text(f'Probability of being High Quality: {pred_prob:.2f}')
+        # Prediction
+        try:
+            pred_prob = model.predict(review_input_array)
+            pred_prob_value = pred_prob[0][0]  # Get the probability
+
+            label = 'High Quality' if pred_prob_value >= 0.5 else 'Low Quality'
+            
+            # Show result
+            st.subheader(f'Prediction: {label}')
+            st.text(f'Probability of being High Quality: {pred_prob_value:.2f}')
+        except Exception as e:
+            st.error(f'Error during prediction: {e}')
