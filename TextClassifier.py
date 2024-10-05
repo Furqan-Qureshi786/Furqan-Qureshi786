@@ -18,20 +18,25 @@ def load_model():
     model.add(tf.keras.layers.Dropout(0.4))
     model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
     
-    # Load trained weights (if you have any)
-    # Example: model.load_weights('path_to_saved_model_weights')
+    # Uncomment if you have a pre-trained model
+    # model.load_weights('path_to_saved_model_weights')
+    
     return model
 
 model = load_model()
 
 # Load and preprocess your dataset
-train_data = pd.read_csv('https://raw.githubusercontent.com/Furqan-Qureshi786/TextClassifier/refs/heads/main/wine-reviews.csv')
+try:
+    train_data = pd.read_csv('https://raw.githubusercontent.com/Furqan-Qureshi786/TextClassifier/refs/heads/main/wine-reviews.csv')
+except Exception as e:
+    st.error(f"Error loading data: {e}")
+    st.stop()
 
 # Check if the necessary columns exist
 if 'description' not in train_data.columns or 'points' not in train_data.columns:
     st.error("The required columns 'description' or 'points' are not present in the dataset.")
 else:
-    # Convert specific columns to numeric, handling errors by coercing to NaN
+    # Convert 'points' to numeric, handling errors by coercing to NaN
     train_data['points'] = pd.to_numeric(train_data['points'], errors='coerce')
     train_data.fillna({'points': 0}, inplace=True)  # Fill NaN values for points column
 
@@ -50,12 +55,16 @@ else:
         if review_input.strip() == '':
             st.error('Please enter a wine review.')
         else:
-            # Make the prediction
-            pred_prob = model.predict(np.array([review_input]))[0][0]
+            try:
+                # Make the prediction
+                review_array = np.array([review_input])  # Ensure the input is in the correct shape
+                pred_prob = model.predict(review_array)[0][0]
 
-            # Determine label based on the predicted probability
-            label = 'High Quality' if pred_prob >= 0.5 else 'Low Quality'
-            
-            # Show result
-            st.subheader(f'Prediction: {label}')
-            st.text(f'Probability of being High Quality: {pred_prob:.2f}')
+                # Determine label based on the predicted probability
+                label = 'High Quality' if pred_prob >= 0.5 else 'Low Quality'
+                
+                # Show result
+                st.subheader(f'Prediction: {label}')
+                st.text(f'Probability of being High Quality: {pred_prob:.2f}')
+            except Exception as e:
+                st.error(f"Error during prediction: {e}")
