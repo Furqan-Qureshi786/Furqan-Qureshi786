@@ -22,29 +22,24 @@ def load_model():
                   loss=tf.keras.losses.BinaryCrossentropy(),
                   metrics=['accuracy'])
     
-    # Load trained weights (this assumes you have trained and saved model weights)
-    # Example: model.load_weights('path_to_saved_model_weights')
     return model
 
 model = load_model()
 
 # Load and preprocess your dataset
-train_data = pd.read_csv('https://raw.githubusercontent.com/Furqan-Qureshi786/TextClassifier/refs/heads/main/wine-reviews.csv')
+train_data = pd.read_csv('https://raw.githubusercontent.com/Furqan-Qureshi786/TextClassifier/main/wine-reviews.csv')
 
 # Convert specific columns to numeric, handling errors by coercing to NaN
-columns_to_convert = ['points', 'price']  # Only numeric columns
+columns_to_convert = ['points', 'price']
 for column in columns_to_convert:
     train_data[column] = pd.to_numeric(train_data[column], errors='coerce')
 
 # Fill NaN values after conversion
-train_data.fillna(0, inplace=True)  # You can also use train_data.dropna(inplace=True)
+train_data.fillna(0, inplace=True)
 
 # Prepare the data for training (split features and labels)
-# Assuming 'quality' is your target variable; adjust as needed
 X = train_data['description']  # Feature column
-y = train_data['points']  # Target variable; change 'quality' to 'points' based on your dataset
-
-# Optionally: Split your data into training and validation sets here
+y = train_data['points']  # Target variable
 
 # Streamlit app interface
 st.title('Wine Review Quality Classifier')
@@ -57,8 +52,11 @@ if st.button('Predict'):
     if review_input.strip() == '':
         st.error('Please enter a wine review.')
     else:
+        # Preprocess the input (wrap the input string in a list)
+        review_input_array = np.array([review_input])
+
         # Prediction
-        pred_prob = model.predict([review_input])[0][0]
+        pred_prob = model.predict(review_input_array)[0][0]
 
         label = 'High Quality' if pred_prob >= 0.5 else 'Low Quality'
         
