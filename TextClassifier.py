@@ -52,42 +52,25 @@ else:
     review_input = st.text_area('Enter your wine review:', '')
 
     # Predict button
-    if st.button('Predict'):
-        if review_input.strip() == '':
-            st.error('Please enter a wine review.')
-        else:
-            try:
-                # Preprocess the review (e.g., tokenization and embedding)
-                def preprocess_review(text):
-                    # Tokenize the text
-                    tokens = tf.keras.preprocessing.text.text_to_word_sequence(text)
+# ... (rest of your code)
 
-                    # Create a vocabulary and convert tokens to indices
-                    vocab = set(tokens)
-                    word_index = {word: i for i, word in enumerate(vocab)}
-                    encoded_review = [word_index.get(word, 0) for word in tokens]
+if st.button('Predict'):
+    if review_input.strip() == '':
+        st.error('Please enter a wine review.')
+    else:
+        try:
+            # Preprocess the review (e.g., tokenization and embedding)
+            def preprocess_review(text):
+                # ... (your preprocessing steps)
+                return tokenized_review  # Assuming tokenized_review is a list of strings
 
-                    # Pad the sequence to a fixed length (adjust as needed)
-                    max_length = 100
-                    padded_review = tf.keras.preprocessing.sequence.pad_sequences([encoded_review], maxlen=max_length, padding='post')
+            processed_review = preprocess_review(review_input)
 
-                    return padded_review
+            # Convert the processed review to a single-element tensor
+            review_array = tf.convert_to_tensor([processed_review], dtype=tf.string)
 
-                processed_review = preprocess_review(review_input)
+            pred_prob = model.predict(review_array)[0][0]
 
-                # Convert the processed review to a single-element tensor
-                review_array = tf.convert_to_tensor([processed_review], dtype=tf.float32)
-
-                # Reshape the review array using tf.reshape
-                review_array = tf.reshape(review_array, (1, -1))
-
-                pred_prob = model.predict(review_array)[0][0]
-
-                # Determine label based on the predicted probability
-                label = 'High Quality' if pred_prob >= 0.5 else 'Low Quality'
-
-                # Show result
-                st.subheader(f'Prediction: {label}')
-                st.text(f'Probability of being High Quality: {pred_prob:.2f}')
-            except Exception as e:
-                st.error(f"Error during prediction: {e}")
+            # ... (rest of your prediction code)
+        except Exception as e:
+            st.error(f"Error during prediction: {e}")
