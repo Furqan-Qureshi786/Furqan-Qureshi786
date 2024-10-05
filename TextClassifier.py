@@ -29,7 +29,7 @@ def load_model():
 model = load_model()
 
 # Load and preprocess your dataset
-train_data = pd.read_csv('path_to_your_dataset.csv')
+train_data = pd.read_csv('https://github.com/Furqan-Qureshi786/TextClassifier/blob/main/wine-reviews.csv')
 
 # Convert specific columns to numeric, handling errors by coercing to NaN
 columns_to_convert = ['points', 'price']  # Only numeric columns
