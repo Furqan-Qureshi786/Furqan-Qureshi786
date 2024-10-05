@@ -12,7 +12,7 @@ def load_model():
 
     model = tf.keras.Sequential()
     model.add(tf.keras.layers.Lambda(lambda text: hub_layer(text), input_shape=(None,), dtype=tf.string))
-# ... (rest of your model layers)
+    # ... (rest of your model layers)
     model.add(tf.keras.layers.Dense(16, activation='relu'))
     model.add(tf.keras.layers.Dropout(0.4))
     model.add(tf.keras.layers.Dense(16, activation='relu'))
@@ -52,25 +52,26 @@ else:
     review_input = st.text_area('Enter your wine review:', '')
 
     # Predict button
-# ... (rest of your code)
+    if st.button('Predict'):
+        if review_input.strip() == '':
+            st.error('Please enter a wine review.')
+        else:
+            try:
+                # Preprocess the review (e.g., tokenization and embedding)
+                def preprocess_review(text):
+                    # Your tokenization logic here (e.g., using libraries like NLTK or spaCy)
+                    # ...
+                    tokenized_review = text.split()  # Example tokenization (adjust as needed)
+                    return tokenized_review
 
-if st.button('Predict'):
-    if review_input.strip() == '':
-        st.error('Please enter a wine review.')
-    else:
-        try:
-            # Preprocess the review (e.g., tokenization and embedding)
-            def preprocess_review(text):
-                # ... (your preprocessing steps)
-                return tokenized_review  # Assuming tokenized_review is a list of strings
+                processed_review = preprocess_review(review_input)
 
-            processed_review = preprocess_review(review_input)
+                # Convert the processed review to a single-element tensor
+                review_array = tf.convert_to_tensor([processed_review], dtype=tf.string)
 
-            # Convert the processed review to a single-element tensor
-            review_array = tf.convert_to_tensor([processed_review], dtype=tf.string)
+                pred_prob = model.predict(review_array)[0][0]
 
-            pred_prob = model.predict(review_array)[0][0]
-
-            # ... (rest of your prediction code)
-        except Exception as e:
-            st.error(f"Error during prediction: {e}")
+                # ... (rest of your prediction code)
+                st.success(f"Predicted wine quality score: {pred_prob}")
+            except Exception as e:
+                st.error(f"Error during prediction: {e}")
