@@ -1,5 +1,5 @@
 streamlit
 tensorflow
-tensorflow_hub
+tensorflow-hub
 numpy
 pandas
